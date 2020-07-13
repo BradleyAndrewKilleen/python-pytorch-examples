@@ -1,28 +1,25 @@
 import torch
 import torchvision
 import torchvision.transforms as transforms
+import matplotlib.pyplot as plt
+import numpy as np
+import torch.nn as nn
+import torch.nn.functional as F
+import torch.optim as optim
 
 transform = transforms.Compose(
     [transforms.ToTensor(),
      transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))])
-
 trainset = torchvision.datasets.CIFAR10(root='./data', train=True,
                                         download=True, transform=transform)
 trainloader = torch.utils.data.DataLoader(trainset, batch_size=4,
                                           shuffle=True, num_workers=2)
-
 testset = torchvision.datasets.CIFAR10(root='./data', train=False,
                                        download=True, transform=transform)
 testloader = torch.utils.data.DataLoader(testset, batch_size=4,
                                          shuffle=False, num_workers=2)
-
 classes = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
-
-import matplotlib.pyplot as plt
-import numpy as np
-
-# functions to show an image
 
 
 def imshow(img):
@@ -31,19 +28,11 @@ def imshow(img):
     plt.imshow(np.transpose(npimg, (1, 2, 0)))
     plt.show()
 
-
-# get some random training images
 dataiter = iter(trainloader)
 images, labels = dataiter.next()
 
-# show images
 imshow(torchvision.utils.make_grid(images))
-# print labels
 print(' '.join('%5s' % classes[labels[j]] for j in range(4)))
-
-import torch.nn as nn
-import torch.nn.functional as F
-
 
 class Net(nn.Module):
     def __init__(self):
@@ -63,9 +52,9 @@ class Net(nn.Module):
         x = self.fc3(x)
         return x
 
+PATH = './cifar_net.pth'
 net = Net()
-
-import torch.optim as optim
+net.load_state_dict(torch.load(PATH))
 
 criterion = nn.CrossEntropyLoss()
 optimizer = optim.SGD(net.parameters(), lr=0.001, momentum=0.9)
@@ -140,3 +129,7 @@ with torch.no_grad():
 for i in range(10):
     print('Accuracy of %5s : %2d %%' % (
         classes[i], 100 * class_correct[i] / class_total[i]))
+
+import torch
+PATH = './cifar_net.pth'
+net = torch.load(PATH)
